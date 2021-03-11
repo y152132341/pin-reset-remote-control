@@ -8,7 +8,7 @@ The Reset PIN button will basically try every code possible until it finds the f
 
 It is meant to go at human speed because that's the speed the testing TV was able to respond to. Going faster would just result on the TV not being process all commands on the sequence.
 
-
+![pin-reset-remote-control](https://github.com/y152132341/pin-reset-remote-control/blob/main/app/assets/remote.png)
 
 ## Non Developers
 
