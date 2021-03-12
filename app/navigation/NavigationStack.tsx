@@ -72,9 +72,15 @@ const LoggedInNavigator = () => (
 
 const App: React.FC<IProps> = (props: IProps) => {
   const { theme } = props;
-  const isLoggedIn = useSelector(
-    (state: IState) => state.loginReducer.isLoggedIn,
-  );
+
+  /** Commenting this out just for the sake of getting a POC out there 
+   * we only need to get to use the Remote Control which is on the home screen.
+   * const isLoggedIn = useSelector(
+   *   (state: IState) => state.loginReducer.isLoggedIn,
+   * );
+  */
+
+  const isLoggedIn = true;
 
   return (
     <NavigationContainer ref={navigationRef} theme={theme}>

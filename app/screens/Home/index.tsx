@@ -44,23 +44,23 @@ const {
 const Home: React.FC = () => {
   const [irEmitterCapable, setIrEmitterCapable] = useState(false);
   const hasIrEmitter = () => {
-    // eslint-disable-next-line no-shadow
+    /** Check if device has IR Blaster and let user know in case it doesn't */
     IRManager.hasIrEmitter().then((hasIrEmitter: any) =>
       setIrEmitterCapable(hasIrEmitter),
     );
   };
 
   const transmitProntoCode = (prontoHexCode: string) => {
+    /** Send IR command */
     IRManager.transmitProntoCode(prontoHexCode)
-      .then(console.log)
-      .catch(console.log);
   };
 
-  /** Panasonic Plasma TV Discrete Remote Control Codes
-   * http://www.awe-europe.com/documents/Control%20Docs/Panasonic/Panasonic%20plasma%20Discrete-remote-control-code.pdf
-   */
-
+  /** PIN formatter, takes a number as input and produces a PIN as output -- 0 = 0000  */
   const zfill = (n: Number) => ('0000' + n).slice(-4);
+
+  /** Dictionary to convert numbers to it's text values
+   * to then find the right prontocode value by key on the json file 
+   */
   const nums = [
     'ZERO',
     'ONE',
@@ -74,23 +74,36 @@ const Home: React.FC = () => {
     'NINE',
   ];
 
-  // const [isResetting, setIsResetting] = useState(false);
   const [count, setCount] = useState('');
   const resetPin = () => {
+    /** Build 0 to 9999 range */
     const all_pins = Array.from(Array(9999).keys());
 
+    /** Iterate through every element in range, one at a time */
     async.eachSeries(
       all_pins,
-      (item: any, callback: () => void) => {
+      (item: Number, pin_callback: () => void) => {
+        /** Format number to PIN standards -- 0 = 0000 */
         const pin = zfill(item);
+
+        /** Update PIN count state */
         setCount(pin);
+
+        /** Build an array out of PIN's digits -- 0000 = ['0', '0', '0', '0'] */
         const digits = pin.split('');
 
+        /** Send IR signal per each number on PIN sequentially, one at a time */
         async.eachSeries(
           digits,
-          (d: string, kallback: () => void) => {
-            IRManager.transmitProntoCode(PRONTO_CODES[nums[parseInt(d)]]);
-            setTimeout(() => kallback(), 500);
+          (d: string, digit_callback: () => void) => {
+            /** Generat index key to find the right prontocode */
+            const ix = nums[parseInt(d)];
+
+            /** Send IR command */
+            IRManager.transmitProntoCode(PRONTO_CODES[ix]);
+
+            /** Threshold of 500ms which is the testing TV's command processing limit */
+            setTimeout(() => digit_callback(), 500);
           },
           (err: any) => {
             if (err) {
@@ -99,7 +112,8 @@ const Home: React.FC = () => {
           },
         );
 
-        setTimeout(() => callback(), 2000);
+        /** Threshold of 2000ms that is the sum of 4 digits per PIN */
+        setTimeout(() => pin_callback(), 2000);
       },
       (err: any) => {
         if (err) {
